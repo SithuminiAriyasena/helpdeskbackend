@@ -29,7 +29,8 @@ router.get(
         process.env.JWT_SECRET || 'your_jwt_secret_key_here',
         { expiresIn: '1d' }
       );
-      const redirectUrl = `${frontendUrl}/google-callback?token=${token}`;
+      // Encode the token when placing it in the URL to avoid truncation
+      const redirectUrl = `${frontendUrl}/google-callback?token=${encodeURIComponent(token)}`;
       res.redirect(redirectUrl);
     })(req, res, next);
   }
