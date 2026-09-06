@@ -18,8 +18,13 @@ function adminOnly(req, res, next) {
 }
 
 router.use(authMiddleware);
-router.use(adminOnly);
 
+// allow authenticated users to update their own profile
+const { updateUser } = require('../controllers/userController');
+router.put('/:id', updateUser);
+
+// admin-only routes
+router.use(adminOnly);
 router.get('/', getUsers);
 router.get('/trash', getTrashedUsers);
 router.delete('/:id', deleteUser);

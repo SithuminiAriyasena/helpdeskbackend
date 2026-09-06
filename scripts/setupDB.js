@@ -29,6 +29,9 @@ async function setupDatabase() {
         password VARCHAR(255) NULL,
         google_id VARCHAR(255) NULL,
         role ENUM('user', 'admin') DEFAULT 'user',
+        department VARCHAR(255) NULL,
+        avatar TEXT NULL,
+        deleted_at TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -39,6 +42,15 @@ async function setupDatabase() {
     } catch (e) {
       // Column may already exist
     }
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN department VARCHAR(255) NULL');
+    } catch (e) {}
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN avatar TEXT NULL');
+    } catch (e) {}
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP NULL');
+    } catch (e) {}
     try {
       await connection.query('ALTER TABLE users MODIFY COLUMN password VARCHAR(255) NULL');
     } catch (e) {
