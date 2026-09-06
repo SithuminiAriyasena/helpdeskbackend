@@ -4,7 +4,7 @@ const db = require('../config/db');
 exports.getUsers = async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT id, name, email, role, created_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC'
+      'SELECT id, name, email, role, avatar, department, created_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC'
     );
     res.json(rows);
   } catch (err) {
@@ -16,7 +16,7 @@ exports.getUsers = async (req, res) => {
 exports.getTrashedUsers = async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT id, name, email, role, created_at, deleted_at FROM users WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC'
+      'SELECT id, name, email, role, avatar, department, created_at, deleted_at FROM users WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC'
     );
     res.json(rows);
   } catch (err) {
