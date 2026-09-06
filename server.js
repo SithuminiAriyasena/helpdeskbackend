@@ -21,22 +21,25 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+    const sanitizedOrigin = origin.replace(/\/$/, "");
+    if (allowedOrigins.some(o => o.replace(/\/$/, "") === sanitizedOrigin)) {
       return callback(null, true);
     }
-    return callback(null, true); // Or return callback(new Error('Not allowed by CORS')) to restrict
+    return callback(null, true); // keep permissive; change to callback(new Error('Not allowed by CORS')) to restrict
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
 
-// Handle preflight requests explicitly
-app.options('*', cors());
+// Apply CORS middleware globally (handles preflight automatically)
+app.use(cors(corsOptions));
+
+// Use regex wildcard for OPTIONS preflight route to be compatible across Express versions
+app.options(/(.*)/, cors(corsOptions));
 app.use(express.json());
 
 // Rate Limiting for Auth
