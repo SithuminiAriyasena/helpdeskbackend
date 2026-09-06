@@ -13,6 +13,8 @@ const authMiddleware = require('./middleware/auth');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+// Trust the first proxy (Render / load balancer) so rate-limit and IPs work correctly
+app.set('trust proxy', 1);
 app.use(passport.initialize());
 
 // Middleware
