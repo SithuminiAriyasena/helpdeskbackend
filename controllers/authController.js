@@ -50,6 +50,13 @@ exports.register = async (req, res) => {
     res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
   } catch (error) {
     console.error('Register error:', error);
+    // Common MySQL errors: duplicate entry or bad field (missing column)
+    if (error && error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'User already exists', error: error.message });
+    }
+    if (error && (error.code === 'ER_BAD_FIELD_ERROR' || error.code === 'ER_NO_SUCH_TABLE')) {
+      return res.status(500).json({ message: 'Database schema error', error: error.message });
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

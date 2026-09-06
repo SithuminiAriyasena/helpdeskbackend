@@ -7,6 +7,7 @@ const passport = require('./config/passport');
 const googleAuthRoutes = require('./routes/googleAuthRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const userRoutes = require('./routes/userRoutes');
+const debugRoutes = require('./routes/debugRoutes');
 const emailController = require('./controllers/emailController');
 const authMiddleware = require('./middleware/auth');
 
@@ -57,6 +58,9 @@ app.use('/auth', googleAuthRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/users', userRoutes);
+
+// debug routes (gated by DEBUG_ALLOW env var)
+app.use('/api/debug', debugRoutes);
 
 // Ensure direct route exists for replying to tickets (also available under /api/tickets/reply via router)
 app.post('/api/tickets/reply', authMiddleware, emailController.reply);
