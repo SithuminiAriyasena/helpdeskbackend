@@ -7,6 +7,8 @@ const passport = require('./config/passport');
 const googleAuthRoutes = require('./routes/googleAuthRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const userRoutes = require('./routes/userRoutes');
+const emailController = require('./controllers/emailController');
+const authMiddleware = require('./middleware/auth');
 
 const rateLimit = require('express-rate-limit');
 
@@ -37,6 +39,9 @@ app.use('/auth', googleAuthRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/users', userRoutes);
+
+// Ensure direct route exists for replying to tickets (also available under /api/tickets/reply via router)
+app.post('/api/tickets/reply', authMiddleware, emailController.reply);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
