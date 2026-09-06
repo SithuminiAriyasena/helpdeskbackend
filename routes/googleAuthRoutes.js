@@ -13,7 +13,7 @@ router.get(
   '/google/callback',
   (req, res, next) => {
     passport.authenticate('google', { session: false }, (err, user, info) => {
-      const frontendUrl = process.env.FRONTEND_URL || (req.headers.referer ? new URL(req.headers.referer).origin : 'http://localhost:5174');
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       if (err || !user) {
         console.error('Google OAuth authentication failed:', err || info);
         return res.redirect(`${frontendUrl}/login?error=google_failed`);
