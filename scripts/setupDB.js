@@ -8,8 +8,10 @@ async function setupDatabase() {
     // 1. Connect without database to create it if it doesn't exist
     connection = await mysql.createConnection({
       host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASS || '',
+      password: process.env.DB_PASS || process.env.DB_PASSWORD || '',
+      connectTimeout: process.env.DB_CONNECT_TIMEOUT ? Number(process.env.DB_CONNECT_TIMEOUT) : 10000,
     });
 
     const dbName = process.env.DB_NAME || 'helpdesk_tracker';
@@ -42,6 +44,15 @@ async function setupDatabase() {
     } catch (e) {
       // Column may already exist
     }
+    // Ensure core columns exist (for older or different schemas)
+    try { await connection.query('ALTER TABLE users ADD COLUMN name VARCHAR(255) NULL'); } catch (e) {}
+    try { await connection.query('ALTER TABLE users ADD COLUMN email VARCHAR(255) NULL'); } catch (e) {}
+    try { await connection.query('ALTER TABLE users ADD COLUMN password VARCHAR(255) NULL'); } catch (e) {}
+    try { await connection.query("ALTER TABLE users ADD COLUMN role ENUM('user','admin') DEFAULT 'user'") } catch (e) {}
+    try { await connection.query('ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP') } catch (e) {}
+    try { await connection.query('ALTER TABLE users ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST') } catch (e) {}
+    // If `id` exists but isn't AUTO_INCREMENT, try to modify it
+    try { await connection.query('ALTER TABLE users MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT') } catch (e) {}
     try {
       await connection.query('ALTER TABLE users ADD COLUMN department VARCHAR(255) NULL');
     } catch (e) {}
@@ -76,6 +87,14 @@ async function setupDatabase() {
 
     // 4. Seed demo users with separate credentials
     console.log('Seeding demo users...');
+
+    // Debug: show current users table structure for troubleshooting
+    try {
+      const [createRows] = await connection.query('SHOW CREATE TABLE users');
+      console.log('Current users table definition:', createRows[0]['Create Table']);
+    } catch (e) {
+      console.log('Unable to show users table definition:', e.message);
+    }
 
     const usersToInsert = [
       { 
